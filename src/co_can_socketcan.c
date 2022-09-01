@@ -72,7 +72,7 @@ static void DrvCanInit(void)
 {
     struct ifreq ifr;
 
-    printf("[co-socketcan] create socket on interface %s", SOCKETCAN_IF_NAME);
+    printf("[co-socketcan] create socket on interface %s \n", SOCKETCAN_IF_NAME);
 
     if ((sock = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
     {
