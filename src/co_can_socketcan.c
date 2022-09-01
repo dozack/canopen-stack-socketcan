@@ -100,11 +100,16 @@ static void DrvCanEnable(uint32_t baudrate)
 
 static int16_t DrvCanSend(CO_IF_FRM *frm)
 {
-    struct can_frame frame;
+    struct can_frame frame = {0};
 
     frame.can_id = frm->Identifier;
     frame.can_dlc = frm->DLC;
     memcpy(&frame.data[0], &frm->Data[0], frm->DLC);
+
+    if (frm->Identifier > 0x7ff)
+    {
+        frame.can_id |= CAN_EFF_FLAG;
+    }
 
     if (write(sock, &frame, sizeof(struct can_frame)) != sizeof(struct can_frame))
     {
