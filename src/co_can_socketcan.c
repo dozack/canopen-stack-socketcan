@@ -18,51 +18,43 @@
  * INCLUDES
  ******************************************************************************/
 
-#include "co_can_socketcan.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-
-#include <net/if.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-
 #include <linux/can.h>
 #include <linux/can/raw.h>
+#include <net/if.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
+#include "co_can_socketcan.h"
 
 /******************************************************************************
  * PRIVATE DEFINES
  ******************************************************************************/
 
-static int sock;
+static int                 sock;
 static struct sockaddr_can addr;
 
 /******************************************************************************
  * PRIVATE FUNCTIONS
  ******************************************************************************/
 
-static void DrvCanInit(void);
-static void DrvCanEnable(uint32_t baudrate);
-static int16_t DrvCanSend(CO_IF_FRM *frm);
-static int16_t DrvCanRead(CO_IF_FRM *frm);
-static void DrvCanReset(void);
-static void DrvCanClose(void);
+/* clang-format off */
+static void     DrvCanInit(void);
+static void     DrvCanEnable(uint32_t baudrate);
+static int16_t  DrvCanSend(CO_IF_FRM *frm);
+static int16_t  DrvCanRead(CO_IF_FRM *frm);
+static void     DrvCanReset(void);
+static void     DrvCanClose(void);
+/* clang-format on */
 
 /******************************************************************************
  * PUBLIC VARIABLE
  ******************************************************************************/
 
-/* TODO: rename the variable to match the naming convention:
- *   <device>CanDriver
- */
-const CO_IF_CAN_DRV SocketCanDriver = {
-    DrvCanInit,
-    DrvCanEnable,
-    DrvCanRead,
-    DrvCanSend,
-    DrvCanReset,
-    DrvCanClose};
+const CO_IF_CAN_DRV SocketCanDriver = {DrvCanInit, DrvCanEnable, DrvCanRead,
+                                       DrvCanSend, DrvCanReset,  DrvCanClose};
 
 /******************************************************************************
  * PRIVATE FUNCTIONS
@@ -84,7 +76,7 @@ static void DrvCanInit(void)
 
     memset(&addr, 0, sizeof(addr));
 
-    addr.can_family = AF_CAN;
+    addr.can_family  = AF_CAN;
     addr.can_ifindex = ifr.ifr_ifindex;
 }
 
@@ -102,8 +94,8 @@ static int16_t DrvCanSend(CO_IF_FRM *frm)
 {
     struct can_frame frame = {0};
 
-    frame.can_id = frm->Identifier;
-    frame.can_dlc = frm->DLC;
+    frame.can_id           = frm->Identifier;
+    frame.can_dlc          = frm->DLC;
     memcpy(&frame.data[0], &frm->Data[0], frm->DLC);
 
     if (frm->Identifier > 0x7ff)
@@ -131,7 +123,7 @@ static int16_t DrvCanRead(CO_IF_FRM *frm)
     }
 
     frm->Identifier = frame.can_id & CAN_EFF_MASK;
-    frm->DLC = frame.can_dlc;
+    frm->DLC        = frame.can_dlc;
     memcpy(&frm->Data[0], &frame.data[0], frame.can_dlc);
 
     return (sizeof(CO_IF_FRM));
